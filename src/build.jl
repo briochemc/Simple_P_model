@@ -15,7 +15,9 @@ include("problem_setup.jl")
 include("optimization.jl")
 
 # Solve for steady state and save solution
-BSON.@save joinpath(@__DIR__, "..", "data", "optimized_solution.bson") s_optimized p_optimized
+DIPmismatch = 100sqrt(2AIBECS.mismatch(DIP, μDIPobs, σ²DIPobs, v))
+
+BSON.@save joinpath(@__DIR__, "..", "data", "optimized_solution.bson") s_optimized p_optimized DIPmismatch
 
 #=
 To load the optimized model,
