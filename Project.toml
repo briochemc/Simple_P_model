@@ -1,0 +1,8 @@
+name = "Simple_P_model"
+uuid = "4cbe1b07-6dde-492e-bdda-9cbe7a461098"
+authors = ["Benoit Pasquier <pasquieb@uci.edu>"]
+version = "0.1.0"
+
+[deps]
+AIBECS = "ace601d6-714c-11e9-04e5-89b7fad23838"
+BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
