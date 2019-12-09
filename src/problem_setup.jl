@@ -61,6 +61,22 @@ import AIBECS: @flattenable, flattenable, flatten
     τgeo::Tp |   1.0 | u"Myr"         | false
     xgeo::Tp |  2.12 | u"mmol/m^3"    | true
 end
+
+# Assign a lognormal prior to each based on initial value
+using Distributions
+import AIBECS: @prior, prior
+function prior(::Type{T}, s::Symbol) where {T<:Params}
+    if flattenable(T, s)
+        μ = log(ustrip(upreferred(initial_value(T, s) * units(T, s))))
+        return LogNormal(μ ,1.0)
+    else
+        return nothing
+    end
+end
+prior(::T, s::Symbol) where {T<:AbstractParameters} = prior(T,s)
+prior(::Type{T}) where {T<:AbstractParameters} = Tuple(prior(T,s) for s in AIBECS.symbols(T))
+prior(::T) where {T<:AbstractParameters} = prior(T)
+
 # Problem setup
 nb = sum(iswet(grd))
 F, ∇ₓF = state_function_and_Jacobian((T_DIP, T_POP), (G_DIP, G_POP), nb)
