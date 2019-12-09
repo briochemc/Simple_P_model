@@ -37,7 +37,7 @@ end
 const paintedDIP = DIPobs_3D[iwet]
 function U(DIP,p)
     @unpack U₀, α, z₀ = p
-    return @. U₀ * DIP / (DIP+α*paintedDIP) * (z≤z₀) * (DIP≥0)
+    return @. U₀ * DIP^2 / (DIP+α*paintedDIP)^2 * (z≤z₀) * (DIP≥0)
 end
 
 # Remin

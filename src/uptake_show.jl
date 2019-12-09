@@ -1,6 +1,6 @@
 using Plots
 
-x = range(0,5,length=100)
+x = range(0,3,length=100)
 xobs = 1
 τ = 0.5
 k = 0.25
