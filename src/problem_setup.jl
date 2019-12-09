@@ -27,9 +27,19 @@ iwet = findall(vec(iswet(grd)))
 z = ustrip.(grd.depth_3D[iwet])
 
 # Uptake
+# inpaint the observed DIP in the euphotic-zone
+using WorldOceanAtlasTools, Inpaintings
+rawDIPobs3D, nDIPobs3D = WorldOceanAtlasTools.raw_to_grid(grd, 2018, "phosphate", "annual", "1°", "an")
+rawDIPobs3D[nDIPobs3D .== 0] .= NaN
+DIPobs_3D = fill(NaN, size(grd))
+for iz in 1:size(grd)[3]
+    DIPobs_3D[:,:,iz] .= inpaint(rawDIPobs3D[:,:,iz])
+end
+const paintedDIP = DIPobs_3D[iwet]
+# Restore nutrients to "painted" observations
 function U(DIP,p)
-    @unpack U₀, k, z₀ = p
-    return @. U₀ * DIP/(DIP+k) * (z≤z₀) * (DIP≥0)
+    @unpack τ, z₀ = p
+    return @. (DIP-paintedDIP)/τ * (z≤z₀) * (DIP≥paintedDIP)
 end
 
 # Remin
@@ -54,8 +64,7 @@ import AIBECS: @flattenable, flattenable, flatten
 @flattenable @units @initial_value struct Params{Tp} <: AbstractParameters{Tp}
     w₀::Tp   |  0.64 | u"m/d"         | true
     w′::Tp   |  0.13 | u"m/d/m"       | true
-    U₀::Tp   |   1.0 | u"mmol/m^3/yr" | true
-    k::Tp    |   0.2 | u"mmol/m^3"    | true
+    τ::Tp    |  30.0 | u"d"           | true
     z₀::Tp   |  80.0 | u"m"           | false
     τPOP::Tp |   5.0 | u"d"           | true
     τgeo::Tp |   1.0 | u"Myr"         | false

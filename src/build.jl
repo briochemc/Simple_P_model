@@ -4,10 +4,6 @@
 # Run setup script, which should create
 # all the parameters and BGC functions,
 # as well as the problem
-using Pkg
-Pkg.activate()
-Pkg.instantiate()
-
 using AIBECS, BSON
 
 include("problem_setup.jl")
