@@ -15,6 +15,7 @@ include("problem_setup.jl")
 include("optimization.jl")
 
 # Solve for steady state and save solution
+DIP, _ = unpack_tracers(s_optimized, grd)
 DIPmismatch = 100sqrt(2AIBECS.mismatch(DIP, μDIPobs, σ²DIPobs, v))
 
 BSON.@save joinpath(@__DIR__, "..", "data", "optimized_solution.bson") s_optimized p_optimized DIPmismatch

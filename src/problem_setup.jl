@@ -27,9 +27,17 @@ iwet = findall(vec(iswet(grd)))
 z = ustrip.(grd.depth_3D[iwet])
 
 # Uptake
+using WorldOceanAtlasTools, Inpaintings
+rawDIPobs3D, nDIPobs3D = WorldOceanAtlasTools.raw_to_grid(grd, 2018, "phosphate", "annual", "1°", "an")
+rawDIPobs3D[nDIPobs3D .== 0] .= NaN
+DIPobs_3D = fill(NaN, size(grd))
+for iz in 1:size(grd)[3]
+    DIPobs_3D[:,:,iz] .= inpaint(rawDIPobs3D[:,:,iz])
+end
+const paintedDIP = DIPobs_3D[iwet]
 function U(DIP,p)
-    @unpack U₀, k, z₀ = p
-    return @. U₀ * DIP/(DIP+k) * (z≤z₀) * (DIP≥0)
+    @unpack U₀, α, z₀ = p
+    return @. U₀ * DIP / (DIP+α*paintedDIP) * (z≤z₀) * (DIP≥0)
 end
 
 # Remin
@@ -52,14 +60,14 @@ import AIBECS: @units, units
 import AIBECS: @initial_value, initial_value
 import AIBECS: @flattenable, flattenable, flatten
 @flattenable @units @initial_value struct Params{Tp} <: AbstractParameters{Tp}
-    w₀::Tp   |  0.64 | u"m/d"         | true
-    w′::Tp   |  0.13 | u"m/d/m"       | true
-    U₀::Tp   |   1.0 | u"mmol/m^3/yr" | true
-    k::Tp    |   0.2 | u"mmol/m^3"    | true
-    z₀::Tp   |  80.0 | u"m"           | false
-    τPOP::Tp |   5.0 | u"d"           | true
-    τgeo::Tp |   1.0 | u"Myr"         | false
-    xgeo::Tp |  2.12 | u"mmol/m^3"    | true
+    w₀::Tp   | 0.246384 | u"m/d"         | true
+    w′::Tp   | 0.134411 | u"m/d/m"       | true
+    U₀::Tp   | 1.14631  | u"mmol/m^3/yr" | true
+    α::Tp    | 1.0      | u"mol/mol"     | true
+    z₀::Tp   | 80.0     | u"m"           | false
+    τPOP::Tp | 5.4099   | u"d"           | true
+    τgeo::Tp | 1.0      | u"Myr"         | false
+    xgeo::Tp | 2.17766  | u"mmol/m^3"    | true
 end
 
 # Assign a lognormal prior to each based on initial value
